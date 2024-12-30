@@ -16,7 +16,7 @@ from .utils import (
 from .agents import agent_factory
 from .synthesizer import create_synthesizer_agent, summarize_results
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __all__ = [
     'make_api_call',
     'Config',
