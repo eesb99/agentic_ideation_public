@@ -6,6 +6,7 @@ Main entry point for the agentic ideation system.
 import asyncio
 import os
 import yaml
+import json
 from datetime import datetime
 from utils import (
     load_config,
@@ -17,6 +18,31 @@ from utils import (
 from agents import agent_factory
 from synthesizer import create_synthesizer_agent, summarize_results, analyze_results
 
+class DiscussionLogger:
+    def __init__(self):
+        self.history = []
+        self.output_dir = "config/output"
+        os.makedirs(self.output_dir, exist_ok=True)
+        
+    def add_entry(self, entry):
+        """Add a new discussion entry with real-time output"""
+        self.history.append(entry)
+        print("\n[DISCUSSION] New entry added")
+        print(json.dumps(entry, indent=2))
+        self.save_history()
+        
+    def save_history(self):
+        """Save full discussion history"""
+        history_file = os.path.join(self.output_dir, "discussion_history.json")
+        print(f"\n[SAVING] Discussion history to {history_file}")
+        
+        with open(history_file, "w") as f:
+            json.dump(self.history, f, indent=2)
+        print("[SAVED] Discussion history updated\n")
+
+# Initialize the discussion logger
+discussion_logger = DiscussionLogger()
+
 async def execute_tasks(tasks, agents, prompts):
     """
     Execute dynamically generated tasks with agents.
@@ -26,7 +52,10 @@ async def execute_tasks(tasks, agents, prompts):
     total_tasks = sum(sum(len(focus_tasks) for focus_tasks in level_tasks.values()) 
                      for level_tasks in tasks.values())
     log_message(f"Starting execution of {total_tasks} tasks...", "info")
-
+    
+    print("\n[STARTING] Task execution")
+    print(f"[TOTAL] {total_tasks} tasks to process\n")
+    
     agent_idx = 1
     for level_name, level_tasks in tasks.items():
         for focus, focus_tasks in level_tasks.items():
@@ -74,26 +103,54 @@ async def execute_tasks(tasks, agents, prompts):
         
         # Save intermediate results every 10 tasks
         if completed % 10 == 0:
-            save_intermediate_results(results, completed, total_tasks)
+            await save_intermediate_results(results, completed, total_tasks)
             
+        # Log the discussion
+        discussion_logger.add_entry({
+            "task": task_info["key"],
+            "agent": task_info["agent"],
+            "result": result
+        })
+        
     return results
 
-def save_intermediate_results(results, completed, total):
-    """Save intermediate results to a temporary file"""
+async def save_intermediate_results(results, completed, total):
+    """Save intermediate results to a temporary file with real-time output"""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     intermediate_file = os.path.join("temp", f"intermediate_results_{completed}of{total}_{timestamp}.yaml")
     os.makedirs("temp", exist_ok=True)
     
+    print(f"\n[SAVING] Intermediate results ({completed}/{total})")
+    print(f"[PATH] {intermediate_file}")
+    print("[CONTENT]")
+    print(yaml.dump(results))
+    
     with open(intermediate_file, "w") as f:
         yaml.dump(results, f)
-    log_message(f"Saved intermediate results ({completed}/{total} tasks) to {intermediate_file}", "info")
+    print(f"[SAVED] File written successfully\n")
+
+def save_to_yaml(data, file_path):
+    """Save output with real-time display"""
+    print("\n[SAVING] Output data")
+    print("[CONTENT]")
+    print(yaml.dump(data))
+    
+    with open(file_path, "w") as f:
+        yaml.dump(data, f)
+    print(f"[SAVED] Output written to {file_path}\n")
 
 async def main():
+    print("\n[STARTING] Agentic Ideation System")
+    print("[TIME] " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    
     log_message("Loading configuration...", "info")
     # Get the absolute path to the config file
     current_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(current_dir, "config", "base_config.yaml")
     config = load_config(config_path)
+    
+    print("\n[CONFIG] Loaded configuration")
+    print(yaml.dump(config))
     
     topic = config.topic
     total_agents = sum(level.num_agents for level in config.focus_levels)

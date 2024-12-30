@@ -3,7 +3,7 @@ Synthesizer module for combining and analyzing results.
 """
 from typing import Dict, Any, List
 from utils import make_api_call, log_message, save_to_yaml
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 def create_synthesizer_agent(topic: str) -> Dict[str, Any]:
@@ -70,34 +70,38 @@ async def summarize_results(results: Dict, synthesizer_agent: Dict, topic: str, 
     Summarize results using a hierarchical, chunked approach to handle token limits.
     """
     try:
+        if not results:
+            log_message("No results to summarize", "error")
+            return None
+            
         start_time = datetime.now()
+        log_message("Starting results summarization", "info")
         
         # Stage 1: Split results into manageable chunks
-        chunks = chunk_hierarchical_results(results)
-        log_message(f"Split results into {len(chunks)} manageable chunks", "info")
+        try:
+            chunks = chunk_hierarchical_results(results)
+            chunk_count = len(chunks)
+            log_message(f"Split results into {chunk_count} manageable chunks", "info")
+            if chunk_count == 0:
+                log_message("No chunks generated from results", "error")
+                return None
+        except Exception as e:
+            log_message(f"Error splitting results into chunks: {str(e)}", "error")
+            return None
         
         # Stage 2: Summarize each chunk
         chunk_summaries = []
         for i, chunk in enumerate(chunks, 1):
-            log_message(f"Processing chunk {i}/{len(chunks)}", "system")
-            
-            # Format chunk with hierarchical structure
-            chunk_text = ""
-            for level_name, level_tasks in chunk.items():
-                chunk_text += f"\n\nLevel: {level_name}\n"
-                for focus, focus_tasks in level_tasks.items():
-                    chunk_text += f"\nFocus Area: {focus}\n"
-                    for task_id, task_result in focus_tasks.items():
-                        chunk_text += f"\n{task_id}: {task_result[:2000]}..."
+            log_message(f"Processing chunk {i}/{chunk_count}", "info")
             
             try:
-                chunk_prompt = (
-                    f"Summarize this chunk of results for topic: {topic}\n"
-                    f"Focus on key insights while maintaining the hierarchical structure.\n"
-                    f"Format your response with clear sections and avoid repetition.\n\n"
-                    f"{chunk_text}"
-                )
-                
+                # Format chunk with hierarchical structure
+                chunk_text = format_chunk_text(chunk)
+                if not chunk_text:
+                    log_message(f"Empty chunk text for chunk {i}", "warning")
+                    continue
+                    
+                chunk_prompt = create_chunk_prompt(chunk_text, topic)
                 response = await make_api_call(
                     [{"role": "user", "content": chunk_prompt}],
                     synthesizer_agent["model"],
@@ -108,34 +112,23 @@ async def summarize_results(results: Dict, synthesizer_agent: Dict, topic: str, 
                     chunk_summaries.append(response)
                     log_message(f"Successfully summarized chunk {i}", "success")
                 else:
-                    log_message(f"Failed to summarize chunk {i}", "error")
+                    log_message(f"Failed to get response for chunk {i}", "error")
             
             except Exception as e:
-                log_message(f"Error in chunk {i}: {str(e)}", "error")
+                log_message(f"Error processing chunk {i}: {str(e)}", "error")
+                continue
         
         # Stage 3: Final synthesis of chunk summaries
-        if chunk_summaries:
+        if not chunk_summaries:
+            log_message("No successful chunk summaries generated", "error")
+            return None
+            
+        try:
             end_time = datetime.now()
             processing_duration = end_time - start_time
             
-            timestamp_info = (
-                f"Analysis Timestamp: {end_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-                f"Processing Duration: {processing_duration}\n"
-                f"Total Chunks Processed: {len(chunks)}\n"
-                f"{'='*50}\n\n"
-            )
-            
-            final_prompt = (
-                f"Create a final synthesis for topic: {topic}\n"
-                f"Combine these summaries into a cohesive analysis.\n"
-                f"Format your response with these sections:\n"
-                f"1. Executive Summary\n"
-                f"2. Key Findings\n"
-                f"3. Critical Insights\n"
-                f"4. Recommendations\n"
-                f"5. Conclusion (single, concise paragraph)\n\n"
-                + "\n\n---\n\n".join(chunk_summaries)
-            )
+            timestamp_info = create_timestamp_info(end_time, processing_duration, chunk_count)
+            final_prompt = create_final_prompt(topic, chunk_summaries)
             
             final_summary = await make_api_call(
                 [{"role": "user", "content": final_prompt}],
@@ -144,24 +137,79 @@ async def summarize_results(results: Dict, synthesizer_agent: Dict, topic: str, 
             )
             
             if final_summary:
-                return (
-                    f"=== Final Analysis ===\n"
-                    f"{timestamp_info}"
-                    f"Topic: {topic}\n\n"
-                    f"{final_summary}\n\n"
-                    f"{'='*50}\n"
-                    f"End of Analysis - Generated at {end_time.strftime('%Y-%m-%d %H:%M:%S')}"
-                )
+                log_message("Successfully generated final synthesis", "success")
+                return format_final_summary(final_summary, timestamp_info, topic, end_time)
             else:
-                log_message("Failed to create final synthesis", "error")
+                log_message("Failed to generate final synthesis", "error")
                 return None
-        else:
-            log_message("No chunk summaries generated. Aborting synthesis.", "error")
+                
+        except Exception as e:
+            log_message(f"Error in final synthesis: {str(e)}", "error")
             return None
             
     except Exception as e:
-        log_message(f"Error in summarization: {str(e)}", "error")
+        log_message(f"Critical error in summarization: {str(e)}", "error")
         return None
+
+def format_chunk_text(chunk: Dict) -> str:
+    """Format chunk into readable text."""
+    chunk_text = ""
+    try:
+        for level_name, level_tasks in chunk.items():
+            chunk_text += f"\n\nLevel: {level_name}\n"
+            for focus, focus_tasks in level_tasks.items():
+                chunk_text += f"\nFocus Area: {focus}\n"
+                for task_id, task_result in focus_tasks.items():
+                    # Ensure task_result is a string and limit its length
+                    result_text = str(task_result)[:2000] + "..." if len(str(task_result)) > 2000 else str(task_result)
+                    chunk_text += f"\n{task_id}: {result_text}"
+        return chunk_text
+    except Exception as e:
+        log_message(f"Error formatting chunk text: {str(e)}", "error")
+        return ""
+
+def create_chunk_prompt(chunk_text: str, topic: str) -> str:
+    """Create the prompt for summarizing a chunk."""
+    return (
+        f"Summarize this chunk of results for topic: {topic}\n"
+        f"Focus on key insights while maintaining the hierarchical structure.\n"
+        f"Format your response with clear sections and avoid repetition.\n\n"
+        f"{chunk_text}"
+    )
+
+def create_timestamp_info(end_time: datetime, duration: timedelta, chunk_count: int) -> str:
+    """Create formatted timestamp information."""
+    return (
+        f"Analysis Timestamp: {end_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"Processing Duration: {duration}\n"
+        f"Total Chunks Processed: {chunk_count}\n"
+        f"{'='*50}\n\n"
+    )
+
+def create_final_prompt(topic: str, summaries: List[str]) -> str:
+    """Create the prompt for final synthesis."""
+    return (
+        f"Create a final synthesis for topic: {topic}\n"
+        f"Combine these summaries into a cohesive analysis.\n"
+        f"Format your response with these sections:\n"
+        f"1. Executive Summary\n"
+        f"2. Key Findings\n"
+        f"3. Critical Insights\n"
+        f"4. Recommendations\n"
+        f"5. Conclusion (single, concise paragraph)\n\n"
+        + "\n\n---\n\n".join(summaries)
+    )
+
+def format_final_summary(summary: str, timestamp_info: str, topic: str, end_time: datetime) -> str:
+    """Format the final summary with metadata."""
+    return (
+        f"=== Final Analysis ===\n"
+        f"{timestamp_info}"
+        f"Topic: {topic}\n\n"
+        f"{summary}\n\n"
+        f"{'='*50}\n"
+        f"End of Analysis - Generated at {end_time.strftime('%Y-%m-%d %H:%M:%S')}"
+    )
 
 async def deploy_deep_dive_agents(key_areas: str, results: Dict, config: Dict, synthesizer_agent: Dict) -> List[Dict]:
     """
