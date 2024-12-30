@@ -29,7 +29,7 @@ Current version: **0.1.1**
 
 ### Core Dependencies
 ```
-python>=3.8
+python>=3.10
 pydantic>=2.0.0
 pyyaml>=6.0.1
 aiohttp>=3.8.0
@@ -49,25 +49,24 @@ mypy>=1.0.0
 
 ---
 
-## **File Structure**
-```
-.
+## **Project Structure**
+agentic_ideation/
 ├── config/
-│   ├── base_config.yaml    # Base configuration settings
-│   └── output/             # Generated outputs and logs
+│   ├── base_config.yaml     # Main configuration
+│   └── output/              # Discussion history
+├── output/                  # Results output directory
 ├── src/
-│   ├── __init__.py        # Package initialization and version
-│   ├── main.py            # Main execution script
-│   ├── agents.py          # Agent and persona generation
-│   ├── synthesizer.py     # Results synthesis and analysis
-│   └── utils/
-│       ├── api_utils.py   # API interaction logic
-│       ├── tasks.py       # Task generation
-│       └── schemas.py     # Data models and validation
-├── tests/                 # Test suite
-├── requirements.txt       # Python dependencies
-└── environment.yml       # Conda environment configuration
-```
+│   ├── __init__.py         # Package initialization
+│   ├── agents.py           # Agent creation and management
+│   ├── main.py             # Main entry point
+│   ├── synthesizer.py      # Result synthesis
+│   └── utils/              # Utility functions
+│       ├── __init__.py
+│       ├── api_utils.py
+│       ├── schemas.py
+│       └── tasks.py
+├── LICENSE                 # MIT License
+└── README.md              # This file
 
 ---
 
@@ -115,7 +114,31 @@ export OPENROUTER_API_KEY="your_api_key"
 
 ### 5. Run the Program
 ```bash
-python -m src.main
+# Navigate to src directory
+cd src
+
+# Run the main program
+python main.py
+```
+
+The program will:
+1. Load configuration from `config/base_config.yaml`
+2. Generate hierarchical tasks based on the topic
+3. Create and assign agents to tasks
+4. Execute tasks and collect results
+5. Generate a synthesized report
+
+Output will be saved in:
+- `output/{timestamp}/output.yaml`: Main results and analysis
+- `config/output/discussion_history.json`: Full discussion history
+
+### 6. Check Results
+```bash
+# Navigate to output directory
+cd ../config/output
+
+# View results
+cat output.yaml
 ```
 
 ---
