@@ -1,10 +1,17 @@
 # AI Task-Agent System with DeepSeek V3
 
-This project demonstrates an **AI-powered task-agent system** designed to scale up ideation and problem-solving using **DeepSeek V3 API**. The system dynamically creates tasks, assigns them to **100 virtual agents** with unique personas, and synthesizes the results into actionable insights.
+This project demonstrates an **AI-powered task-agent system** designed to scale up ideation and problem-solving using **DeepSeek V3 API** (via OpenRouter). The system dynamically creates tasks, assigns them to **100 virtual agents** with unique personas, and synthesizes the results into actionable insights.
 
-- **Scale**: 100 agents working collaboratively for 24 hours.
-- **Efficiency**: Processes **21 million tokens** for just $5.
+- **Scale**: 100 agents working collaboratively
+- **Efficiency**: Optimized token usage and parallel processing
 - **Use Case**: Ideal for breaking down complex problems and exploring innovative solutions.
+
+## **Version**
+
+Current version: **0.1.1**
+- Enhanced error handling and logging in synthesizer
+- Improved real-time progress reporting
+- Better task result processing
 
 ---
 
@@ -13,23 +20,53 @@ This project demonstrates an **AI-powered task-agent system** designed to scale 
 - **Dynamic Task Generation**: Creates tasks based on a configurable topic and scales to match the number of agents.
 - **Contextual Agents**: Assigns tasks to agents with relevant personas (e.g., strategist, researcher, data analyst).
 - **Scalable Summarization**: Synthesizes outputs from all agents into a cohesive final report.
-- **Cost-Efficiency**: Uses **DeepSeek V3** to achieve large-scale processing at minimal cost.
+- **Real-time Progress**: Shows detailed progress and results in real-time.
+- **Robust Error Handling**: Comprehensive error handling and recovery mechanisms.
+
+---
+
+## **Dependencies**
+
+### Core Dependencies
+```
+python>=3.8
+pydantic>=2.0.0
+pyyaml>=6.0.1
+aiohttp>=3.8.0
+asyncio>=3.4.3
+```
+
+### Development Dependencies
+```
+pytest>=7.0.0
+black>=23.0.0
+mypy>=1.0.0
+```
+
+### API Requirements
+- OpenRouter API access for DeepSeek V3
+- Valid OpenRouter API key
 
 ---
 
 ## **File Structure**
 ```
 .
-├── config.yaml           # Configuration file for topic, task count, and prompts
-├── main.py               # Main execution script
-├── tasks.py              # Dynamic task generation
-├── agents.py             # Agent and persona generation
-├── synthesizer.py        # Synthesizer for summarizing results
-├── api_utils.py          # API interaction logic
-├── requirements.txt      # Python dependencies
-├── environment.yml       # Conda environment configuration
-├── output/               # Directory for generated outputs
-│   ├── generated_config.yaml  # Output of tasks, agents, and summaries
+├── config/
+│   ├── base_config.yaml    # Base configuration settings
+│   └── output/             # Generated outputs and logs
+├── src/
+│   ├── __init__.py        # Package initialization and version
+│   ├── main.py            # Main execution script
+│   ├── agents.py          # Agent and persona generation
+│   ├── synthesizer.py     # Results synthesis and analysis
+│   └── utils/
+│       ├── api_utils.py   # API interaction logic
+│       ├── tasks.py       # Task generation
+│       └── schemas.py     # Data models and validation
+├── tests/                 # Test suite
+├── requirements.txt       # Python dependencies
+└── environment.yml       # Conda environment configuration
 ```
 
 ---
@@ -38,8 +75,8 @@ This project demonstrates an **AI-powered task-agent system** designed to scale 
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-repo/ai-task-agent-system.git
-cd ai-task-agent-system
+git clone https://github.com/eesb99/agentic_ideation.git
+cd agentic_ideation
 ```
 
 ### 2. Environment Setup
@@ -55,38 +92,90 @@ conda activate agentic_ideation
 pip install -r requirements.txt
 ```
 
-### 3. Configure `config.yaml`
-Set the main topic, number of tasks, and other parameters in the YAML file. Example:
+### 3. Configure Settings
+Set the main topic and parameters in `config/base_config.yaml`:
 
 ```yaml
-topic: "AI's role in climate change"
-num_tasks: 100
+topic: "Your research topic"
+focus_levels:
+  - level_name: "Strategic"
+    focuses: ["Market Analysis", "Technology Trends"]
+    num_agents: 3
 ```
 
 ### 4. Set the API Key
-Ensure your **DeepSeek V3 API key** is securely stored in your OS environment variables. On Windows:
+Store your OpenRouter API key in environment variables:
 ```bash
-setx OPENROUTER_API_KEY "your_actual_api_key"
+# Windows
+setx OPENROUTER_API_KEY "your_api_key"
+
+# Linux/Mac
+export OPENROUTER_API_KEY="your_api_key"
 ```
 
 ### 5. Run the Program
-Execute the main script:
 ```bash
-python main.py
+python -m src.main
 ```
 
-### 6. Check Outputs
-The generated tasks, agents, results, and summary will be saved to:
-```
-output/generated_config.yaml
-```
+---
+
+## **Future Improvements**
+
+### Short-term (v0.2.0)
+1. **Performance Optimization**
+   - Implement parallel task processing
+   - Add caching for API responses
+   - Optimize token usage
+
+2. **Enhanced Monitoring**
+   - Add detailed progress visualization
+   - Implement task execution metrics
+   - Create interactive progress dashboard
+
+3. **Error Recovery**
+   - Add automatic retry mechanisms
+   - Implement checkpoint/resume functionality
+   - Add partial results recovery
+
+### Medium-term (v0.3.0)
+1. **Advanced Analysis**
+   - Add sentiment analysis of results
+   - Implement cross-reference between tasks
+   - Add statistical analysis of outputs
+
+2. **Integration Features**
+   - Add REST API interface
+   - Support multiple LLM providers
+   - Add export to various formats
+
+3. **Quality Improvements**
+   - Add automated testing pipeline
+   - Implement result validation
+   - Add quality scoring system
+
+### Long-term (v1.0.0)
+1. **AI Enhancements**
+   - Self-optimizing agent system
+   - Dynamic prompt generation
+   - Adaptive task allocation
+
+2. **Scalability**
+   - Distributed processing support
+   - Cloud deployment options
+   - Horizontal scaling capability
+
+3. **Enterprise Features**
+   - Multi-user support
+   - Access control system
+   - Audit logging
 
 ---
 
 ## **FAQs**
 
 ### **1. What does this system do?**
-This system dynamically generates tasks, assigns them to AI-powered virtual agents, and synthesizes the outputs into a cohesive report. It leverages the **DeepSeek V3 API** for scalable, cost-efficient AI processing.
+This system dynamically generates tasks, assigns them to AI-powered virtual agents, and synthesizes the outputs into a cohesive report. It leverages the **DeepSeek V3 API** (via OpenRouter) for scalable AI processing.
 
 ### **2. How does it handle tasks and agents?**
 The system:
@@ -94,34 +183,20 @@ The system:
 2. Assigns each task to an agent with a relevant persona.
 3. Processes tasks asynchronously and combines the results using a synthesizer agent.
 
-### **3. How much does it cost to run?**
-Using **DeepSeek V3**, processing 21 million tokens with 100 agents for 24 hours costs approximately **$5**.
+### **3. What are the costs involved?**
+The cost varies based on your usage and the current OpenRouter API pricing for DeepSeek V3. We recommend checking the [OpenRouter pricing page](https://openrouter.ai/pricing) for the most up-to-date rates.
 
 ### **4. Can I use this system for other topics?**
-Absolutely! Just update the `topic` field in `config.yaml` to match your desired topic. The system will generate tasks and agents accordingly.
+Absolutely! Just update the `topic` field in `config/base_config.yaml` to match your desired topic. The system will generate tasks and agents accordingly.
 
 ### **5. Is this scalable?**
-Yes! The system can handle hundreds of tasks and agents dynamically. Adjust the `num_tasks` value in `config.yaml` to scale up or down.
+Yes! The system can handle hundreds of tasks and agents dynamically. Adjust the `num_agents` value in `config/base_config.yaml` to scale up or down.
 
 ### **6. What happens if an error occurs during a task?**
 The system logs any errors and continues processing other tasks. The summary report will highlight incomplete or failed tasks.
 
 ### **7. Can I customize the personas or prompts?**
-Yes! You can edit the `task_focuses` and `prompts` sections in `config.yaml` to tailor the system to your needs.
-
----
-
-## **Dependencies**
-
-### Environment Setup
-- **Python 3.10** (via Conda)
-- **Key Libraries**:
-  - `httpx==0.24.1` - For asynchronous API requests
-  - `pyyaml==6.0` - For YAML configuration and output handling
-  - `pydantic>=2.0.0` - For data validation
-  - `python-dotenv>=1.0.0` - For environment variables
-  - `colorlog>=6.7.0` - For colored logging
-  - `tqdm>=4.65.0` - For progress bars
+Yes! You can edit the `focus_levels` section in `config/base_config.yaml` to tailor the system to your needs.
 
 ---
 
@@ -161,8 +236,27 @@ summary:
 
 ---
 
+## **Contributing**
+
+We welcome contributions! Please fork the repository at [https://github.com/eesb99/agentic_ideation](https://github.com/eesb99/agentic_ideation) and submit your pull requests.
+
+## **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## **Acknowledgments**
+
+- OpenRouter team for providing the API
+- DeepSeek team for providing the V3 API
+- Contributors and testers
+- Open source community
+
+---
+
 ## **Contact**
 
-If you have questions or need help with this project, feel free to reach out! 🚀  
+If you have questions or need help with this project, feel free to reach out via [GitHub Issues](https://github.com/eesb99/agentic_ideation/issues)! 🚀  
 
-#DeepSeekV3 #AIAtScale #AffordableAI #InnovationOnABudget
+#OpenRouter #DeepSeekV3 #AIAtScale #AffordableAI #InnovationOnABudget
