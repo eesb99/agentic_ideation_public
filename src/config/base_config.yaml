@@ -1,193 +1,119 @@
-topic: "How might we engineer a plant based protein that reduces 50% sarcopenia in 6 months."
+topic: "AI in Malaysia: Opportunity or Threat to the Future Workforce?"
 
 focus_levels:
   # Level 1: Primary Research Areas
   - level_name: "Primary Research Areas"
     focuses:
-      - "protein engineering"
-      - "clinical research"
-      - "nutritional science"
-      - "medical specialization"
-      - "manufacturing"
-      - "regulatory compliance"
-      - "market analysis"
+      - "workforce impact analysis"
+      - "economic implications"
+      - "education and training"
+      - "industry transformation"
+      - "policy and regulation"
+      - "social impact"
+      - "technological readiness"
     num_agents: 20
     parent_focus: null
 
-  # Level 2: Engineering Specifics
-  - level_name: "Engineering Specifics"
+  # Level 2: Workforce Analysis
+  - level_name: "Workforce Analysis"
     focuses:
-      - "protein structure analysis"
-      - "amino acid optimization"
-      - "folding simulation"
-      - "stability enhancement"
-      - "bioavailability improvement"
+      - "job displacement risk"
+      - "new job creation"
+      - "skill requirements"
+      - "workforce adaptation"
+      - "labor market trends"
     num_agents: 20
-    parent_focus: "protein engineering"
+    parent_focus: "workforce impact analysis"
 
-  # Level 3: Engineering Deep Dive
-  - level_name: "Engineering Deep Dive"
+  # Level 3: Economic Impact
+  - level_name: "Economic Impact"
     focuses:
-      - "molecular modeling"
-      - "binding site optimization"
-      - "protein-protein interactions"
-      - "structural stability analysis"
-      - "conformational dynamics"
+      - "productivity analysis"
+      - "industry competitiveness"
+      - "investment patterns"
+      - "economic growth potential"
+      - "income distribution effects"
     num_agents: 15
-    parent_focus: "protein structure analysis"
+    parent_focus: "economic implications"
 
-  # Level 4: Clinical Details
-  - level_name: "Clinical Details"
+  # Level 4: Education System
+  - level_name: "Education System"
     focuses:
-      - "efficacy testing"
-      - "safety assessment"
-      - "dosage optimization"
-      - "absorption studies"
-      - "side effect monitoring"
+      - "curriculum adaptation"
+      - "reskilling programs"
+      - "digital literacy"
+      - "industry partnerships"
+      - "educational technology"
     num_agents: 15
-    parent_focus: "clinical research"
+    parent_focus: "education and training"
 
-  # Level 5: Clinical Deep Dive
-  - level_name: "Clinical Deep Dive"
+  # Level 5: Industry Sectors
+  - level_name: "Industry Sectors"
     focuses:
-      - "muscle tissue response"
-      - "protein uptake mechanisms"
-      - "biomarker analysis"
-      - "metabolic pathways"
-      - "cellular signaling"
-    num_agents: 10
-    parent_focus: "efficacy testing"
-
-  # Level 6: Nutritional Science Specifics
-  - level_name: "Nutritional Science Specifics"
-    focuses:
-      - "protein bioavailability"
-      - "amino acid profiling"
-      - "nutrient synergies"
-      - "digestibility analysis"
-      - "nutritional requirements"
+      - "manufacturing automation"
+      - "service sector AI adoption"
+      - "tech startup ecosystem"
+      - "traditional business transformation"
+      - "digital infrastructure"
     num_agents: 15
-    parent_focus: "nutritional science"
+    parent_focus: "industry transformation"
 
-  # Level 7: Nutritional Deep Dive
-  - level_name: "Nutritional Deep Dive"
+  # Level 6: Policy Framework
+  - level_name: "Policy Framework"
     focuses:
-      - "protein-nutrient interactions"
-      - "absorption mechanisms"
-      - "metabolic optimization"
-      - "nutrient timing"
-      - "supplementation strategies"
-    num_agents: 10
-    parent_focus: "protein bioavailability"
-
-  # Level 8: Medical Specialization
-  - level_name: "Medical Specialization"
-    focuses:
-      - "geriatric medicine"
-      - "sports medicine"
-      - "rehabilitation"
-      - "endocrinology"
-      - "muscle physiology"
+      - "AI governance"
+      - "labor protection"
+      - "innovation incentives"
+      - "data protection"
+      - "ethical guidelines"
     num_agents: 15
-    parent_focus: "medical specialization"
+    parent_focus: "policy and regulation"
 
-  # Level 9: Medical Deep Dive
-  - level_name: "Medical Deep Dive"
-    focuses:
-      - "sarcopenia mechanisms"
-      - "muscle regeneration"
-      - "hormone optimization"
-      - "inflammation control"
-      - "recovery protocols"
-    num_agents: 10
-    parent_focus: "geriatric medicine"
+analysis_agents:
+  - level_name: "Impact Analysis"
+    agent_types:
+      - name: "Trend Analyzer"
+        focus: "identify emerging patterns in workforce transformation"
+        num_agents: 5
+      - name: "Risk Assessor"
+        focus: "evaluate potential threats and opportunities"
+        num_agents: 5
+      - name: "Policy Expert"
+        focus: "analyze regulatory implications"
+        num_agents: 5
+      - name: "Economic Analyst"
+        focus: "assess economic impact and opportunities"
+        num_agents: 5
+      - name: "Social Impact Evaluator"
+        focus: "examine societal consequences"
+        num_agents: 5
 
-  # Level 10: Dietetic Implementation
-  - level_name: "Dietetic Implementation"
-    focuses:
-      - "meal planning"
-      - "dietary protocols"
-      - "compliance strategies"
-      - "progress monitoring"
-      - "dietary adjustments"
-    num_agents: 10
-    parent_focus: "nutritional science"
-
-  # Level 11: Production Specifics
-  - level_name: "Production Specifics"
-    focuses:
-      - "scale-up process"
-      - "quality control"
-      - "cost optimization"
-      - "equipment selection"
-      - "batch validation"
-    num_agents: 10
-    parent_focus: "manufacturing"
-
-  # Level 12: Manufacturing Deep Dive
-  - level_name: "Manufacturing Deep Dive"
-    focuses:
-      - "process optimization"
-      - "yield improvement"
-      - "purification techniques"
-      - "stability testing"
-      - "contamination prevention"
-    num_agents: 10
-    parent_focus: "scale-up process"
-
-  # Level 13: Regulatory Deep Dive
-  - level_name: "Regulatory Deep Dive"
-    focuses:
-      - "safety documentation"
-      - "clinical trial protocols"
-      - "quality assurance"
-      - "compliance monitoring"
-      - "regulatory submissions"
-    num_agents: 10
-    parent_focus: "regulatory compliance"
-
-  # Level 14: Market Intelligence
-  - level_name: "Market Intelligence"
-    focuses:
-      - "competitor analysis"
-      - "pricing strategy"
-      - "distribution channels"
-      - "customer segmentation"
-      - "market positioning"
-    num_agents: 10
-    parent_focus: "market analysis"
-
-  # Level 15: Implementation Strategy
-  - level_name: "Implementation Strategy"
-    focuses:
-      - "production timeline"
-      - "resource allocation"
-      - "risk mitigation"
-      - "quality metrics"
-      - "success indicators"
-    num_agents: 10
-    parent_focus: null
-
-# Deep Dive Configuration
 deep_dive_agents:
   - level_name: "Deep Dive Analysis"
     agent_types:
-      - name: "Pattern Analyzer"
-        focus: "identify patterns and correlations"
+      - name: "Industry Specialist"
+        focus: "sector-specific impact analysis"
         num_agents: 5
-      - name: "Gap Investigator"
-        focus: "identify research and implementation gaps"
+      - name: "Education Expert"
+        focus: "skill development and training needs"
         num_agents: 5
-      - name: "Innovation Scout"
-        focus: "identify breakthrough opportunities"
+      - name: "Technology Analyst"
+        focus: "AI adoption and implementation patterns"
         num_agents: 5
-      - name: "Risk Assessor"
-        focus: "identify potential challenges and solutions"
+      - name: "Labor Market Expert"
+        focus: "employment trends and workforce dynamics"
         num_agents: 5
-      - name: "Integration Specialist"
-        focus: "identify cross-domain synergies"
+      - name: "Policy Researcher"
+        focus: "regulatory framework analysis"
         num_agents: 5
 
+synthesis_requirements:
+  - "Identify key opportunities and threats"
+  - "Analyze short-term vs long-term impacts"
+  - "Evaluate readiness of Malaysian workforce"
+  - "Assess policy implications"
+  - "Recommend action steps for stakeholders"
+
 prompts:
-  subtask_execution: "{persona}\nYour task: {subtask}\nConsider the following aspects:\n1. Current state analysis\n2. Improvement opportunities\n3. Implementation challenges\n4. Success metrics\n5. Next steps"
-  synthesizer: "Topic: {topic}\nAnalyze the results focusing on:\n1. Key findings\n2. Critical insights\n3. Implementation recommendations\n4. Risk factors\n5. Success criteria"
+  subtask_execution: "{persona}\nYour task: {subtask}\nConsider the following aspects:\n1. Current state of AI adoption in Malaysia\n2. Workforce transformation opportunities\n3. Implementation challenges\n4. Success metrics\n5. Next steps"
+  synthesizer: "Topic: {topic}\nAnalyze the results focusing on:\n1. Key findings on AI impact\n2. Critical insights for Malaysian workforce\n3. Implementation recommendations\n4. Risk mitigation strategies\n5. Success criteria for stakeholders"

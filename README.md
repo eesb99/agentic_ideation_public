@@ -32,11 +32,18 @@ Current version: **0.1.1**
 ### Core Dependencies
 ```
 python>=3.10
-pydantic>=2.0.0
+pydantic>=2.4.2
 pyyaml>=6.0.1
-aiohttp>=3.8.0
+aiohttp>=3.8.5
 asyncio>=3.4.3
 multiprocessing>=0.70.14
+typing-extensions>=4.7.1
+python-dotenv>=1.0.0
+colorama>=0.4.6
+tqdm>=4.65.0
+rich>=13.5.2
+aiofiles>=23.2.1
+tenacity>=8.2.2
 ```
 
 ### Development Dependencies
@@ -59,6 +66,9 @@ agentic_ideation/
 │   ├── base_config.yaml     # Main configuration
 │   └── output/              # Discussion history
 ├── docs/
+│   ├── API.md               # API documentation
+│   ├── CONTRIBUTING.md      # Contribution guide
+│   ├── HOWTO.md             # Detailed guide
 │   ├── agent_batch_processing.md  # Agent batching guide
 │   ├── chunk_context_guide.md     # Context management
 │   └── batching_impact.md         # Performance analysis
@@ -82,6 +92,20 @@ agentic_ideation/
 
 ---
 
+## **System Architecture**
+
+### 1. Agent Types
+- **Focus Level Agents**: Specialized in specific areas of the topic
+- **Analysis Agents**: Perform cross-cutting analysis
+- **Deep Dive Agents**: Conduct detailed investigations
+- **Synthesizer Agent**: Combines and summarizes all findings
+
+### 2. Task Organization
+- Hierarchical task decomposition
+- Parallel task execution
+- Real-time progress tracking
+- Intermediate results saving
+
 ## **Setup Instructions**
 
 ### 1. Clone the Repository
@@ -95,7 +119,7 @@ cd agentic_ideation
 ```bash
 # Create and activate conda environment
 conda env create -f environment.yml
-conda activate agentic_ideation
+conda activate agentic_ideation_public
 ```
 
 #### Option 2: Install with pip

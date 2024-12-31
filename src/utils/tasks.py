@@ -24,13 +24,19 @@ def generate_hierarchical_tasks(config: Config) -> dict:
     # Process each focus level
     for level in config.focus_levels:
         level_tasks = {}
-        agents_per_focus = level.num_agents // len(level.focuses)
+        
+        # Calculate base tasks per focus and remaining tasks
+        base_tasks_per_focus = level.num_agents // len(level.focuses)
+        remaining_tasks = level.num_agents % len(level.focuses)
         
         # Generate tasks for each focus in this level
-        for focus in level.focuses:
+        for i, focus in enumerate(level.focuses):
             focus_tasks = {}
-            for i in range(agents_per_focus):
-                task_id = f"{level.level_name}_{focus}_{i+1}".lower().replace(" ", "_")
+            # Add one extra task to early focuses if there are remaining tasks
+            tasks_for_this_focus = base_tasks_per_focus + (1 if i < remaining_tasks else 0)
+            
+            for j in range(tasks_for_this_focus):
+                task_id = f"{level.level_name}_{focus}_{j+1}".lower().replace(" ", "_")
                 task_description = (
                     f"Focus: {focus} within {level.level_name}\n"
                     f"Parent Focus: {level.parent_focus if level.parent_focus else 'Root'}\n"

@@ -22,7 +22,8 @@ def chunk_hierarchical_results(results: Dict) -> List[Dict]:
     chunks = []
     current_chunk = {}
     current_size = 0
-    max_size = 8000  # Reduced to 8K tokens to allow for synthesis overhead
+    max_size = 6000  # Reduced to 6K to allow room for prompts within 8K context
+    max_result_length = 2000  # Reduced to ensure chunks fit within limits
     
     for level_name, level_tasks in results.items():
         for focus, focus_tasks in level_tasks.items():
@@ -46,7 +47,7 @@ def chunk_hierarchical_results(results: Dict) -> List[Dict]:
                             temp_tasks = {}
                             temp_size = 0
                     # Truncate very long results
-                    truncated_result = str(task_result)[:1500] + "..." if len(str(task_result)) > 1500 else str(task_result)
+                    truncated_result = str(task_result)[:max_result_length] + "..." if len(str(task_result)) > max_result_length else str(task_result)
                     temp_tasks[task_id] = truncated_result
                     temp_size += len(truncated_result)
                 if temp_tasks:
@@ -55,7 +56,7 @@ def chunk_hierarchical_results(results: Dict) -> List[Dict]:
                 if level_name not in current_chunk:
                     current_chunk[level_name] = {}
                 current_chunk[level_name][focus] = {
-                    task_id: str(result)[:1500] + "..." if len(str(result)) > 1500 else str(result)
+                    task_id: str(result)[:max_result_length] + "..." if len(str(result)) > max_result_length else str(result)
                     for task_id, result in focus_tasks.items()
                 }
                 current_size += focus_size
@@ -63,6 +64,7 @@ def chunk_hierarchical_results(results: Dict) -> List[Dict]:
     if current_chunk:
         chunks.append(current_chunk)
     
+    log_message(f"Created {len(chunks)} chunks with max size {max_size} tokens and max result length {max_result_length} chars", "info")
     return chunks
 
 async def summarize_results(results: Dict, synthesizer_agent: Dict, topic: str, synthesizer_prompt: str) -> str:

@@ -40,6 +40,8 @@ temp/
 *.log
 .env
 .env.*
+.windsurfrules
+progress/
 
 # OS
 .DS_Store

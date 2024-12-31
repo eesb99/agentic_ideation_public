@@ -1,22 +1,19 @@
-name: agentic_ideation
+name: agentic_ideation_public
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python=3.10
   - pip
-  - httpx=0.24.1
-  - pyyaml=6.0
-  - aiohttp=3.8.0
-  - asyncio=3.4.3
   - pip:
-    - python-dotenv>=1.0.0
-    - pydantic>=2.0.0
-    - colorlog>=6.7.0
-    - tqdm>=4.65.0
-    - aiofiles>=23.1.0
-    - aiologger>=0.7.0
-    - pytest-asyncio>=0.21.0  # For testing async code
-    - pytest-aiohttp>=1.0.4   # For testing async HTTP
-    - black>=23.0.0           # Code formatting
-    - mypy>=1.0.0            # Type checking
+    - pyyaml>=6.0.1        # Configuration and output
+    - aiohttp>=3.8.5       # Async HTTP client
+    - asyncio>=3.4.3       # Async support
+    - pydantic>=2.4.2      # Data validation
+    - typing-extensions>=4.7.1  # Type hints
+    - python-dotenv>=1.0.0  # Environment variables
+    - colorama>=0.4.6      # Console colors
+    - tqdm>=4.65.0         # Progress bars
+    - rich>=13.5.2         # Rich console output
+    - aiofiles>=23.2.1     # Async file operations
+    - tenacity>=8.2.2      # Retry logic

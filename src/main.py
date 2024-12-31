@@ -43,31 +43,45 @@ class DiscussionLogger:
 # Initialize the discussion logger
 discussion_logger = DiscussionLogger()
 
-async def execute_tasks(tasks, agents, prompts):
+async def execute_tasks(tasks, agents, prompts, config):
     """
     Execute dynamically generated tasks with agents.
     """
     results = {}
     task_list = []
-    total_tasks = sum(sum(len(focus_tasks) for focus_tasks in level_tasks.values()) 
-                     for level_tasks in tasks.values())
-    log_message(f"Starting execution of {total_tasks} tasks...", "info")
     
-    print("\n[STARTING] Task execution")
+    # Calculate total tasks across all levels and agent types
+    focus_tasks = sum(len(focus_tasks) for level_tasks in tasks.values() for focus_tasks in level_tasks.values())
+    analysis_tasks = sum(sum(agent_type.num_agents for agent_type in group.agent_types) 
+                        for group in config.analysis_agents)
+    deep_dive_tasks = sum(sum(agent_type.num_agents for agent_type in group.agent_types) 
+                         for group in config.deep_dive_agents)
+    total_tasks = focus_tasks + analysis_tasks + deep_dive_tasks
+    
+    log_message(f"Starting execution of {total_tasks} tasks ({focus_tasks} focus, {analysis_tasks} analysis, {deep_dive_tasks} deep dive)...", "info")
+    print(f"\n[STARTING] Task execution")
     print(f"[TOTAL] {total_tasks} tasks to process\n")
     
-    agent_idx = 1
+    # Process focus level tasks
     for level_name, level_tasks in tasks.items():
         for focus, focus_tasks in level_tasks.items():
+            # Find agents for this focus and level
+            focus_agents = [
+                (aid, a) for aid, a in agents.items()
+                if a['type'] == 'focus' and a['level'] == level_name and a['focus_area'] == focus
+            ]
+            
             for task_id, task_description in focus_tasks.items():
-                agent_key = f"agent_{agent_idx}"
-                agent = agents.get(agent_key)
-                if agent:
+                # Get the next available agent for this focus
+                if focus_agents:
+                    agent_id, agent = focus_agents.pop(0)
                     log_message(f"Dispatching {task_id} to {agent['name']}", "system")
+                    
                     subtask_prompt = prompts.subtask_execution.format(
                         persona=agent["persona"],
                         subtask=task_description
                     )
+                    
                     task_list.append({
                         "task": asyncio.create_task(
                             make_api_call(
@@ -81,10 +95,32 @@ async def execute_tasks(tasks, agents, prompts):
                         "level": level_name,
                         "focus": focus
                     })
-                agent_idx += 1
+    
+    # Process analysis and deep dive agents
+    for agent_id, agent in agents.items():
+        if agent['type'] in ['analysis', 'deep_dive']:
+            task_id = f"{agent['type']}_{agent_id}"
+            subtask_prompt = prompts.subtask_execution.format(
+                persona=agent["persona"],
+                subtask=f"Analyze {agent['focus_area']} for the topic: {config.topic}"
+            )
+            
+            task_list.append({
+                "task": asyncio.create_task(
+                    make_api_call(
+                        [{"role": "user", "content": subtask_prompt}],
+                        agent["model"],
+                        f"Executing {task_id} with {agent['name']}"
+                    )
+                ),
+                "key": task_id,
+                "agent": agent['name'],
+                "level": agent['type'],
+                "focus": agent['focus_area']
+            })
 
+    # Process results
     completed = 0
-    total_tasks = len(task_list)
     for task_info in task_list:
         try:
             result = await task_info["task"]
@@ -97,21 +133,21 @@ async def execute_tasks(tasks, agents, prompts):
                 completed += 1
                 log_message(f"Task {task_info['key']} completed successfully with {task_info['agent']} ({completed}/{total_tasks})", "success")
             else:
-                log_message(f"Task {task_info['key']} failed with {task_info['agent']} ({completed}/{total_tasks})", "error")
+                log_message(f"Task {task_info['key']} failed with {task_info['agent']}", "error")
         except Exception as e:
             log_message(f"Error in task {task_info['key']}: {str(e)}", "error")
         
         # Save intermediate results every 10 tasks
         if completed % 10 == 0:
             await save_intermediate_results(results, completed, total_tasks)
-            
+        
         # Log the discussion
         discussion_logger.add_entry({
             "task": task_info["key"],
             "agent": task_info["agent"],
             "result": result
         })
-        
+    
     return results
 
 async def save_intermediate_results(results, completed, total):
@@ -153,14 +189,19 @@ async def main():
     print(yaml.dump(config))
     
     topic = config.topic
-    total_agents = sum(level.num_agents for level in config.focus_levels)
+    # Calculate total agents from all types
+    focus_agents = sum(level.num_agents for level in config.focus_levels)
+    analysis_agents = sum(sum(agent.num_agents for agent in group.agent_types) for group in config.analysis_agents)
+    deep_dive_agents = sum(sum(agent.num_agents for agent in group.agent_types) for group in config.deep_dive_agents)
+    total_agents = focus_agents + analysis_agents + deep_dive_agents
     
+    log_message(f"Total agents: {total_agents} ({focus_agents} focus, {analysis_agents} analysis, {deep_dive_agents} deep dive)", "info")
     log_message("Generating hierarchical tasks and creating agents...", "info")
     tasks = generate_hierarchical_tasks(config)
-    agents = agent_factory(total_agents, topic, [focus for level in config.focus_levels for focus in level.focuses])
+    agents = agent_factory(config)
 
     log_message("Starting task execution...", "info")
-    results = await execute_tasks(tasks, agents, config.prompts)
+    results = await execute_tasks(tasks, agents, config.prompts, config)
 
     log_message("Creating synthesizer agent...", "info")
     synthesizer_agent = create_synthesizer_agent(topic)
