@@ -19,6 +19,8 @@ Current version: **0.1.1**
 
 - **Dynamic Task Generation**: Creates tasks based on a configurable topic and scales to match the number of agents.
 - **Contextual Agents**: Assigns tasks to agents with relevant personas (e.g., strategist, researcher, data analyst).
+- **Async Agent Processing**: CPU-optimized async processing with efficient batch management.
+- **Smart Batching**: Token-aware batch processing with optimal resource utilization.
 - **Scalable Summarization**: Synthesizes outputs from all agents into a cohesive final report.
 - **Real-time Progress**: Shows detailed progress and results in real-time.
 - **Robust Error Handling**: Comprehensive error handling and recovery mechanisms.
@@ -34,6 +36,7 @@ pydantic>=2.0.0
 pyyaml>=6.0.1
 aiohttp>=3.8.0
 asyncio>=3.4.3
+multiprocessing>=0.70.14
 ```
 
 ### Development Dependencies
@@ -46,6 +49,7 @@ mypy>=1.0.0
 ### API Requirements
 - OpenRouter API access for DeepSeek V3
 - Valid OpenRouter API key
+- Minimum 64K context window support
 
 ---
 
@@ -54,10 +58,18 @@ agentic_ideation/
 ├── config/
 │   ├── base_config.yaml     # Main configuration
 │   └── output/              # Discussion history
+├── docs/
+│   ├── agent_batch_processing.md  # Agent batching guide
+│   ├── chunk_context_guide.md     # Context management
+│   └── batching_impact.md         # Performance analysis
 ├── output/                  # Results output directory
+├── progress/               # Progress tracking
+│   ├── CHANGELOG.md        # Detailed changes
+│   └── README.md           # Progress overview
 ├── src/
 │   ├── __init__.py         # Package initialization
 │   ├── agents.py           # Agent creation and management
+│   ├── async_agent_processor.py  # Async processing system
 │   ├── main.py             # Main entry point
 │   ├── synthesizer.py      # Result synthesis
 │   └── utils/              # Utility functions
@@ -93,7 +105,6 @@ pip install -r requirements.txt
 
 ### 3. Configure Settings
 Set the main topic and parameters in `config/base_config.yaml`:
-
 ```yaml
 topic: "Your research topic"
 focus_levels:
@@ -220,6 +231,28 @@ The system logs any errors and continues processing other tasks. The summary rep
 
 ### **7. Can I customize the personas or prompts?**
 Yes! You can edit the `focus_levels` section in `config/base_config.yaml` to tailor the system to your needs.
+
+---
+
+## **Technical Details**
+
+### Agent Processing System
+- CPU-aware agent allocation (2 agents per core for I/O operations)
+- Token-aware batch processing (32K tokens per batch)
+- Async processing with efficient resource management
+- Smart error handling and retry mechanisms
+
+### Batch Processing
+- Optimal batch size: 4 chunks per batch
+- Dynamic batch adjustment based on workload
+- Token limit management (64K context window)
+- Memory-efficient processing
+
+### Performance Features
+- Efficient CPU core utilization
+- Controlled API concurrency
+- Memory usage optimization
+- Detailed performance monitoring
 
 ---
 
